@@ -1,5 +1,4 @@
 from simulate_profit import Market, Options
-from typing import Union
 import pandas as pd
 import numpy as np
 import altair as alt
@@ -8,7 +7,7 @@ import streamlit as st
 table_col_names = ['Stock price', 'Price ratio %', 'Stock value', 'Net profit']
 
 @st.cache
-def simulate(model: Union[Market, Options], start: int, end: int, increments: int):
+def simulate(model, start: int, end: int, increments: int):
 
     sim_range = range(start, end, increments)
 
@@ -23,7 +22,6 @@ def simulate(model: Union[Market, Options], start: int, end: int, increments: in
 def merge_data(left, right, on, suffixes):
     full_data = pd.merge(left=left, right=right, on=on, suffixes=suffixes)
     return full_data
-
 
 st.set_page_config(page_title='Call option vs market price', page_icon=None, layout='wide')
 
@@ -54,7 +52,7 @@ simulated_market = Market.to_table(market_data, table_col_names)
 
 left = simulated_options[['Stock price', 'Price ratio %', 'Stock value', 'Net profit']]
 right = simulated_market[['Stock price', 'Stock value', 'Net profit']]
-full_data = merge_data(left, right, on='Stock price', suffixes=(" otions", " market"))
+full_data = merge_data(left, right, on='Stock price', suffixes=(" options", " market"))
 
 plot_dict = {
    'Market net profit': simulated_market.set_index('Stock price')['Net profit'],
