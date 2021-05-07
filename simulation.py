@@ -25,13 +25,19 @@ def merge_data(left, right, on, suffixes):
 
 @st.cache
 def break_even(simulated_data) -> dict:
-    lowest_positive_idx = min(simulated_data[simulated_data['Net profit options'] >= 0].index)
-    return simulated_data.iloc[lowest_positive_idx, :][['Stock price', 'Price ratio %']].to_dict()
+    data_slice = simulated_data[simulated_data['Net profit options'] >= 0]
+    if len(data_slice.index) > 0:
+        lowest_positive_idx = min(data_slice.index)
+        return simulated_data.iloc[lowest_positive_idx, :][['Stock price', 'Price ratio %']].to_dict()
+    return {'Stock price': 'Range too limited', 'Price ratio %': '-'}
 
 @st.cache
 def better_than_market(simulated_data) -> dict:
-    lowest_better_idx = min(simulated_data[simulated_data['Net profit options'] > simulated_data['Net profit market']].index)
-    return simulated_data.iloc[lowest_better_idx, :][['Stock price', 'Price ratio %']].to_dict()
+    data_slice = simulated_data[simulated_data['Net profit options'] > simulated_data['Net profit market']]
+    if len(data_slice.index) > 0:
+        lowest_better_idx = min(data_slice.index)
+        return simulated_data.iloc[lowest_better_idx, :][['Stock price', 'Price ratio %']].to_dict()
+    return {'Stock price': 'Range too limited', 'Price ratio %': '-'}
 
 st.set_page_config(page_title='Call option vs market price', page_icon=None, layout='wide')
 
@@ -83,32 +89,32 @@ with st.beta_container():
         chart_col2.area_chart(plot_dict, height=chart_height)
     else:
         chart_col2.line_chart(plot_dict, height=chart_height)
-    chart_col2.caption('Simulated net profit for future (three years) stock prices, with LTIP call options compared to direct market purchases')
+    chart_col2.caption('Simulated net profit for future (three years) stock prices, with call options compared to direct market purchases')
 
     break_even_price = break_even(full_data)
     better_than_market_price = better_than_market(full_data)
 
-    below_chart_1 = st.beta_columns(2)
-    below_chart_1[0].write('**Break even for options**:')
-    below_chart_1[1].write('**Options better than market**:')
-    below_chart_2 = st.beta_columns(2)
-    below_chart_2[0].write(f'Stock price: {break_even_price["Stock price"]} ({break_even_price["Price ratio %"]}%)')
-    below_chart_2[1].write(f'Stock price: {better_than_market_price["Stock price"]} ({better_than_market_price["Price ratio %"]}%)')
+    below_chart = st.beta_columns(2)
+    below_chart[0].markdown(f'**Break even for options**:<br> Stock price: {break_even_price["Stock price"]} ({break_even_price["Price ratio %"]}%)', unsafe_allow_html=True)
+    below_chart[1].markdown(f'**Options better than market**:<br> Stock price: {better_than_market_price["Stock price"]} ({better_than_market_price["Price ratio %"]}%)', unsafe_allow_html=True)
     
-
 with st.beta_expander('Show data:'):
     _, data_col, _ = st.beta_columns((1,10,1))
     data_col.write(full_data)
 
-st.write(''' ### What do we learn?
+st.markdown(''' ### What do we learn? :bulb:
     This simple analysis shows the difference in risk and reward between purchasing call options via your company and going directly to the market.
     
-    Call options, if part of a reasonable programme design, always start off at a loss (negative net profit) at the time of purchase,
-    with a break even ocurring at a certain point beyond the predetermined strike factor. However, if the stock develops sufficiently enough,
-    the net profit rapidly outperforms the market profit for every unit increase. 
+    Call options, if part of a reasonable programme design, always start off at a projected loss on prices close to the initial stock price, due to the fact that the resulting stock will only be available to purchase at strike price.<br>
+    Break even ocurrs at a certain point beyond the predetermined strike factor. However, if the stock develops sufficiently enough,
+    the options net profit rapidly outperforms the market profit for every unit increase. 
+
+    Note, that one <strike>would</strike> should only buy the resulting stocks it the stock price is *above* break even, or better yet, above the "better-than-market" threshold.<br>
+    In other words, with the call options, you **never** have to lose more than the initial investment, as opposed to purchasing directly from the market.
     
     Given that there is a good outlook for the company during the call option programme window,
     and there are feasible financing alternatives for purchasing the resulting shares upon strike, call options are very much worth a consideration.
     
-    It might also be good for company spirit :sunglasses:'''
+    It might also be good for company spirit :sunglasses:''',
+    unsafe_allow_html=True
     )
