@@ -23,6 +23,16 @@ def merge_data(left, right, on, suffixes):
     full_data = pd.merge(left=left, right=right, on=on, suffixes=suffixes)
     return full_data
 
+@st.cache
+def break_even(simulated_data) -> dict:
+    lowest_positive_idx = min(simulated_data[simulated_data['Net profit options'] >= 0].index)
+    return simulated_data.iloc[lowest_positive_idx, :][['Stock price', 'Price ratio %']].to_dict()
+
+@st.cache
+def better_than_market(simulated_data) -> dict:
+    lowest_better_idx = min(simulated_data[simulated_data['Net profit options'] > simulated_data['Net profit market']].index)
+    return simulated_data.iloc[lowest_better_idx, :][['Stock price', 'Price ratio %']].to_dict()
+
 st.set_page_config(page_title='Call option vs market price', page_icon=None, layout='wide')
 
 st.write('## Call option vs market price purchasing: a simulated comparison')
@@ -40,6 +50,12 @@ with st.form('Input parameters'):
 
 options = Options(option_price, no_of_options, initial_stock_price, strike_price_factor)
 market = Market(option_price, no_of_options, initial_stock_price, strike_price_factor)
+
+attributes = st.beta_columns(4)
+attributes[0].write(f'**Initial investment (option cost)**: {options.option_cost}')
+attributes[1].write(f'**Strike price**: {options.strike_price}')
+attributes[2].write(f'**Stock cost at strike**: {options.stock_cost_at_strike}')
+attributes[3].write(f'**Number of stocks (corresponding to {options.no_of_options} options)**: {round(market.no_of_stocks)}')
 
 range_col1, range_col2 = st.beta_columns(2)
 selected_min = range_col1.slider('Lower bound', min_value=50, max_value=initial_stock_price)
@@ -68,6 +84,17 @@ with st.beta_container():
     else:
         chart_col2.line_chart(plot_dict, height=chart_height)
     chart_col2.caption('Simulated net profit for future (three years) stock prices, with LTIP call options compared to direct market purchases')
+
+    break_even_price = break_even(full_data)
+    better_than_market_price = better_than_market(full_data)
+
+    below_chart_1 = st.beta_columns(2)
+    below_chart_1[0].write('**Break even for options**:')
+    below_chart_1[1].write('**Options better than market**:')
+    below_chart_2 = st.beta_columns(2)
+    below_chart_2[0].write(f'Stock price: {break_even_price["Stock price"]} ({break_even_price["Price ratio %"]}%)')
+    below_chart_2[1].write(f'Stock price: {better_than_market_price["Stock price"]} ({better_than_market_price["Price ratio %"]}%)')
+    
 
 with st.beta_expander('Show data:'):
     _, data_col, _ = st.beta_columns((1,10,1))
