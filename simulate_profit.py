@@ -10,7 +10,7 @@ class SimulateProfit:
         self.initial_stock_price = initial_stock_price
         self.strike_price_factor = strike_price_factor
         self.strike_price = self.strike_price_factor*self.initial_stock_price
-        self.no_of_stocks = self.option_cost/self.initial_stock_price
+        self.no_of_stocks = self.gross_option_cost/self.initial_stock_price
         self.stock_cost_at_strike = self.strike_price*self.no_of_options
 
     def stock_price_ratio(self, stock_price):
