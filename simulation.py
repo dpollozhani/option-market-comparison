@@ -45,17 +45,21 @@ st.write('## Call option vs market price purchasing: a simulated comparison')
 st.caption('by *dpollozhani*')
 
 with st.form('Input parameters'):
-    firstrow_col1, firstrow_col2 = st.beta_columns(2)
+    firstrow_col1, firstrow_col2, firstrow_col3 = st.beta_columns(3)
     secondrow_col1, secondrow_col2, secondrow_col3 = st.beta_columns(3)
+    
     option_price = firstrow_col1.number_input('Option price', min_value=1, value=10)
     no_of_options = firstrow_col2.number_input('# of options', min_value=1, value=6000)
+    subsidy = firstrow_col3.number_input('Subsidy (of which half is assumed taxable):', min_value=0.0, max_value=1.0, value=0.5)
+    
     initial_stock_price = secondrow_col1.number_input('Initial stock price', min_value=1, value=130)
     strike_price_factor = secondrow_col2.number_input('Strike price factor', min_value=1.1, max_value=1.5, value=1.25)
     price_increments = secondrow_col3.number_input('Price increments', min_value=1, max_value=5, value=1)
+    
     calculate = st.form_submit_button('Calculate')
 
-options = Options(option_price, no_of_options, initial_stock_price, strike_price_factor)
-market = Market(option_price, no_of_options, initial_stock_price, strike_price_factor)
+options = Options(option_price, no_of_options, subsidy, initial_stock_price, strike_price_factor)
+market = Market(option_price, no_of_options, subsidy, initial_stock_price, strike_price_factor)
 
 attributes = st.beta_columns(4)
 attributes[0].write(f'**Initial investment (option cost)**: {options.option_cost}')
