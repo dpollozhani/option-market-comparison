@@ -2,10 +2,11 @@ import pandas as pd
 
 class SimulateProfit:
 
-    def __init__(self, option_price: int, no_of_options: int, initial_stock_price: int, strike_price_factor: float = 1.25):
+    def __init__(self, option_price: int, no_of_options: int, subsidy: float, initial_stock_price: int, strike_price_factor: float = 1.25):
         self.option_price = option_price
         self.no_of_options = no_of_options
-        self.option_cost = option_price*no_of_options
+        self.gross_option_cost = option_price*no_of_options
+        self.option_cost = self.gross_option_cost - self.gross_option_cost*subsidy*0.5 #assuming 50% taxable
         self.initial_stock_price = initial_stock_price
         self.strike_price_factor = strike_price_factor
         self.strike_price = self.strike_price_factor*self.initial_stock_price
