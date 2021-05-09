@@ -29,7 +29,7 @@ class Market(SimulateProfit):
         return self.no_of_stocks*stock_price
         
     def net_profit(self, stock_value):
-        return stock_value-self.option_cost
+        return stock_value-self.gross_option_cost
 
 class Options(SimulateProfit):
     
